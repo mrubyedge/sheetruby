@@ -5,12 +5,22 @@ use std::rc::Rc;
 
 use mruby_compiler2_sys::MRubyCompiler2Context;
 use mrubyedge::yamrb::value::RObject;
+use mrubyedge::yamrb::vm::VM;
 
 fn main() {}
 
 /// Execute Ruby script and return the result as Rc<RObject>
 /// Returns None if compilation or execution fails
 fn eval_ruby_script(text: &str) -> Option<Rc<RObject>> {
+    eval_ruby_script_with_setup(text, |_| {})
+}
+
+/// Execute Ruby script with VM setup callback
+/// The callback can be used to set global variables before execution
+fn eval_ruby_script_with_setup<F>(text: &str, setup: F) -> Option<Rc<RObject>>
+where
+    F: FnOnce(&mut VM),
+{
     let mut context = unsafe { MRubyCompiler2Context::new() };
 
     // Compile the Ruby script
@@ -35,14 +45,18 @@ fn eval_ruby_script(text: &str) -> Option<Rc<RObject>> {
     let mut vm = mrubyedge::yamrb::vm::VM::open(&mut rite);
     mrubyedge_math::init_math(&mut vm);
 
+    // Call setup callback to configure VM (e.g., set global variables)
+    setup(&mut vm);
+
     // Execute the script and handle exceptions
-    match vm.run() {
-        Ok(r) => Some(r),
-        Err(e) => {
-            eprintln!("Runtime error: {:?}", e);
-            None
-        }
+    let result = vm.run();
+    if let Err(e) = result {
+        eprintln!("Runtime error: {:?}", e);
+        return None;
     }
+    mrubyedge_serde_json::mrb_json_class_dump(&mut vm, &[result.unwrap()])
+        .unwrap_or_else(|_| RObject::string("null".to_string()).to_refcount_assigned())
+        .into()
 }
 
 /// Convert C string pointer to Rust &str
@@ -51,56 +65,46 @@ unsafe fn cstr_to_str<'a>(text_ptr: *const c_char) -> &'a str {
     c_str.to_str().unwrap_or("")
 }
 
-// Function called from JavaScript
-// Receives Ruby script, executes it, and returns integer result
-#[unsafe(no_mangle)]
-pub extern "C" fn eval_ruby_script_int(text_ptr: *const c_char) -> i32 {
-    unsafe {
-        let text = cstr_to_str(text_ptr);
-        match eval_ruby_script(text) {
-            Some(result) => (&*result).try_into().unwrap_or(-1),
-            None => -1,
-        }
-    }
-}
-
-// Receives Ruby script, executes it, and returns float result
-#[unsafe(no_mangle)]
-pub extern "C" fn eval_ruby_script_float(text_ptr: *const c_char) -> f64 {
-    unsafe {
-        let text = cstr_to_str(text_ptr);
-        match eval_ruby_script(text) {
-            Some(result) => (&*result).try_into().unwrap_or(f64::NAN),
-            None => f64::NAN,
-        }
-    }
-}
-
-// Receives Ruby script, executes it, and returns boolean result (0 or 1)
-#[unsafe(no_mangle)]
-pub extern "C" fn eval_ruby_script_bool(text_ptr: *const c_char) -> i32 {
-    unsafe {
-        let text = cstr_to_str(text_ptr);
-        match eval_ruby_script(text) {
-            Some(result) => {
-                let b: bool = (&*result).try_into().unwrap_or(false);
-                if b { 1 } else { 0 }
-            }
-            None => 0,
-        }
-    }
-}
-
 // Receives Ruby script, executes it, and returns string result
 // Returns a pointer to a null-terminated C string (caller should NOT free it)
 // The returned string is valid until the next call to this function
 static mut LAST_STRING_RESULT: Option<CString> = None;
 
 #[unsafe(no_mangle)]
-pub extern "C" fn eval_ruby_script_string(text_ptr: *const c_char) -> *const c_char {
+pub extern "C" fn eval_ruby_script_returning_json(text_ptr: *const c_char) -> *const c_char {
     unsafe {
         let text = cstr_to_str(text_ptr);
         match eval_ruby_script(text) {
+            Some(result) => {
+                let s: String = (&*result).try_into().unwrap_or_default();
+                match CString::new(s) {
+                    Ok(cstring) => {
+                        let ptr = cstring.as_ptr();
+                        LAST_STRING_RESULT = Some(cstring);
+                        ptr
+                    }
+                    Err(_) => std::ptr::null(),
+                }
+            }
+            None => std::ptr::null(),
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn eval_ruby_script_returning_json1(
+    text_ptr: *const c_char,
+    arg1_ptr: *const c_char,
+) -> *const c_char {
+    unsafe {
+        let text = cstr_to_str(text_ptr);
+        let arg1 = cstr_to_str(arg1_ptr);
+        match eval_ruby_script_with_setup(text, |vm| {
+            let arg1_str = RObject::string(arg1.to_string()).to_refcount_assigned();
+            let arg1_json = mrubyedge_serde_json::mrb_json_class_load(vm, &[arg1_str])
+                .unwrap_or_else(|_| RObject::nil().to_refcount_assigned());
+            vm.globals.insert("$arg1".to_string(), arg1_json);
+        }) {
             Some(result) => {
                 let s: String = (&*result).try_into().unwrap_or_default();
                 match CString::new(s) {

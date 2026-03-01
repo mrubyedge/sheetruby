@@ -1,64 +1,38 @@
 /**
  * eval ruby script and return integer value
- * @param {string} input ruby code.
+ * Arguments are accessible as $arg1, $arg2, etc. in Ruby code.
+ * @param {string} text ruby code.
+ * @param {...(string|number|Array<Array<string|number>>)} args arguments accessible as $arg1, $arg2, etc. (converted to string).
  * @return The integer result of the Ruby script.
  * @customfunction
 */
-function EVAL_RUBY_SCRIPT_INT(text) {
-    return Module.ccall(
-        'eval_ruby_script_int',
-        'number',
-        ['string'],
-        [text]
-    );
-}
-
-/**
- * eval ruby script and return float value
- * @param {string} input ruby code.
- * @return The float result of the Ruby script.
- * @customfunction
-*/
-function EVAL_RUBY_SCRIPT_FLOAT(text) {
-    return Module.ccall(
-        'eval_ruby_script_float',
-        'number',
-        ['string'],
-        [text]
-    );
-}
-
-/**
- * eval ruby script and return boolean value
- * @param {string} input ruby code.
- * @return The boolean result of the Ruby script.
- * @customfunction
-*/
-function EVAL_RUBY_SCRIPT_BOOL(text) {
-    var result = Module.ccall(
-        'eval_ruby_script_bool',
-        'number',
-        ['string'],
-        [text]
-    );
-    return result !== 0;
-}
-
-/**
- * eval ruby script and return string value
- * @param {string} input ruby code.
- * @return The string result of the Ruby script.
- * @customfunction
-*/
-function EVAL_RUBY_SCRIPT_STRING(text) {
-    var ptr = Module.ccall(
-        'eval_ruby_script_string',
-        'number',
-        ['string'],
-        [text]
-    );
-    if (ptr === 0) {
-        return "";
+function EVAL_RUBY_SCRIPT(text) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if (args.length === 0) {
+        const result = Module.ccall(
+            'eval_ruby_script_returning_json',
+            'string',
+            ['string'],
+            [text]
+        );
+        return JSON.parse(result);
+    } else if (args.length === 1) {
+        const result = Module.ccall(
+            'eval_ruby_script_returning_json1',
+            'string',
+            ['string', 'string'],
+            [text, JSON.stringify(args[0])]
+        );
+        return JSON.parse(result);
+    } else {
+        // For now, only support up to 1 argument
+        // TODO: Add support for more arguments
+        const result = Module.ccall(
+            'eval_ruby_script_returning_json1',
+            'string',
+            ['string', 'string'],
+            [text, JSON.stringify(args[0])]
+        );
+        return JSON.parse(result);
     }
-    return Module.UTF8ToString(ptr);
 }

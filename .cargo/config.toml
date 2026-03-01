@@ -3,7 +3,7 @@ rustflags = [
     "-C",
     "link-args=-o out.js",
     "-C",
-    "link-args=-s EXPORTED_FUNCTIONS=['_eval_ruby_script_int','_eval_ruby_script_float','_eval_ruby_script_string','_eval_ruby_script_bool','_main']",
+    "link-args=-s EXPORTED_FUNCTIONS=['_eval_ruby_script_returning_json','_eval_ruby_script_returning_json1','_main']",
     "-C",
     "link-args=-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']",
     "-C",
