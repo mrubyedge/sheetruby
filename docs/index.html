@@ -1,96 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SheetRuby - mruby VM in your spreadsheet">
-    <title>SheetRuby Documentation</title>
+    <meta name="description" content="SheetRuby - Run Ruby code in Google Sheets using mruby/edge">
+    <title>SheetRuby - mruby VM in your spreadsheet</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
             color: #333;
             background: #f5f5f5;
         }
-        
+
         header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 2rem 0;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
         }
-        
+
         header p {
             font-size: 1.2rem;
             opacity: 0.9;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
-        
+
         .card {
             background: white;
             border-radius: 8px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card h2 {
             color: #667eea;
             margin-bottom: 1rem;
             font-size: 1.8rem;
         }
-        
-        .card p {
+
+        .card h3 {
+            color: #764ba2;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.3rem;
+        }
+
+        .card p,
+        .card li {
+            margin-bottom: 0.8rem;
+        }
+
+        .card ul,
+        .card ol {
+            margin-left: 2rem;
             margin-bottom: 1rem;
         }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .feature-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .feature-card h3 {
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-        
+
         .cta {
             text-align: center;
             margin: 3rem 0;
         }
-        
+
         .btn {
             display: inline-block;
             padding: 0.8rem 2rem;
@@ -100,12 +90,13 @@
             border-radius: 5px;
             font-weight: bold;
             transition: transform 0.3s ease;
+            margin: 0.5rem;
         }
-        
+
         .btn:hover {
             transform: scale(1.05);
         }
-        
+
         footer {
             background: #333;
             color: white;
@@ -113,68 +104,199 @@
             padding: 2rem 0;
             margin-top: 4rem;
         }
-        
+
         code {
             background: #f4f4f4;
             padding: 0.2rem 0.5rem;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .example {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .example strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
     <header>
-        <h1>🔷 SheetRuby</h1>
-        <p>Bring the power of mruby VM to your spreadsheets</p>
+        <h1>🔷 sheetruby</h1>
+        <p>Run Ruby code in Google Sheets using mruby/edge</p>
     </header>
 
     <div class="container">
         <div class="card">
-            <h2>Welcome to SheetRuby</h2>
+            <h2>What is sheetruby?</h2>
             <p>
-                SheetRuby is an innovative project that embeds the <strong>mruby Virtual Machine</strong> 
-                into spreadsheet applications, enabling you to write Ruby code directly in your spreadsheets.
-            </p>
-            <p>
-                This documentation provides everything you need to get started with SheetRuby, 
-                from installation to advanced usage patterns.
+                sheetruby embeds the <a href="https://github.com/udzura/mrubyedge" target="_blank">mruby/edge</a> VM
+                into Google Apps Script, allowing you to execute Ruby code directly in your spreadsheets.
+                It compiles to WebAssembly and runs entirely within Google Sheets' Apps Script environment.
             </p>
         </div>
 
-        <div class="features">
-            <div class="feature-card">
-                <h3>🚀 Fast & Lightweight</h3>
-                <p>Built on mruby, designed for embedded systems with minimal overhead.</p>
+        <div class="card">
+            <h2>How to Use</h2>
+            <ol>
+                <li>Open your Google Spreadsheet</li>
+                <li>Go to <strong>Extensions</strong> → <strong>Apps Script</strong></li>
+                <li>Copy the contents of
+                    <code><a href="https://github.com/mrubyedge/sheetruby/blob/v0.2.0/combined.js" target="_blank">combined.js</a></code>
+                    and paste it into the script editor</li>
+                <li>Save the script</li>
+                <li>Return to your spreadsheet - the <code>EVAL_RUBY_SCRIPT()</code> function is now available!</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2><code>EVAL_RUBY_SCRIPT()</code> Function Specification</h2>
+            <pre><code>EVAL_RUBY_SCRIPT(ruby_code, [arg1], [arg2], [arg3])</code></pre>
+
+            <h3>Parameters</h3>
+            <ul>
+                <li><strong>First argument (required)</strong>: Ruby script code
+                    <ul>
+                        <li>Can be a string literal or reference to a cell</li>
+                    </ul>
+                </li>
+                <li><strong>Arguments 2-4 (optional)</strong>: Data to pass to the Ruby script
+                    <ul>
+                        <li>Can reference cells or ranges</li>
+                        <li>Accessible in Ruby as global variables <code>$arg1</code>, <code>$arg2</code>,
+                            <code>$arg3</code></li>
+                        <li>Currently supports up to 3 arguments</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Type Handling</h3>
+            <ul>
+                <li><strong>Single cell</strong>: Type is automatically inferred (number, string, boolean)</li>
+                <li><strong>Multiple cells</strong>: Passed as a 2D array (Array of Arrays)</li>
+                <li><strong>Return value</strong>: Type is automatically inferred from Ruby result via JSON
+                    serialization</li>
+            </ul>
+
+            <h3>Examples</h3>
+
+            <div class="example">
+                <strong>Basic calculation:</strong>
+                <pre><code>=EVAL_RUBY_SCRIPT("1 + 2")
+# => 3</code></pre>
             </div>
-            <div class="feature-card">
-                <h3>💎 Ruby Syntax</h3>
-                <p>Write elegant Ruby code in your spreadsheet cells and formulas.</p>
+
+            <div class="example">
+                <strong>Using cell references:</strong>
+                <pre><code>=EVAL_RUBY_SCRIPT("$arg1 * 2", A1)
+# If A1 = 21, returns 42</code></pre>
             </div>
-            <div class="feature-card">
-                <h3>🔧 Extensible</h3>
-                <p>Add custom functions and integrate with your existing tools.</p>
+
+            <div class="example">
+                <strong>Array processing:</strong>
+                <pre><code>=EVAL_RUBY_SCRIPT("$arg1.map { |x| x * $arg2 }", A1:A3, B1)
+# If A1:A3 = [[1], [2], [3]] and B1 = 10
+# Returns [10, 20, 30]</code></pre>
             </div>
-            <div class="feature-card">
-                <h3>📊 Data Processing</h3>
-                <p>Process complex data transformations with Ruby's powerful features.</p>
+
+            <div class="example">
+                <strong>Multiple arguments:</strong>
+                <pre><code>=EVAL_RUBY_SCRIPT("$arg1 + $arg2 + $arg3", A1, B1, C1)
+# Sum of three cells</code></pre>
+            </div>
+
+            <div class="example">
+                <strong>String manipulation:</strong>
+                <pre><code>=EVAL_RUBY_SCRIPT("$arg1.upcase", A1)
+# If A1 = "hello", returns "HELLO"</code></pre>
+            </div>
+
+            <div class="example">
+                <strong>Math functions (with mrubyedge-math):</strong>
+                <pre><code>=EVAL_RUBY_SCRIPT("Math.sqrt($arg1)", 16)
+# => 4.0</code></pre>
             </div>
         </div>
 
         <div class="card">
-            <h2>Quick Example</h2>
-            <p>Write Ruby directly in your spreadsheet cells:</p>
-            <p><code>=(1..10).map { |n| n * 2 }.sum</code></p>
-            <p>This Ruby expression calculates the sum of the first 10 even numbers!</p>
+            <h2>Building from Source</h2>
+
+            <h3>Prerequisites</h3>
+
+            <p><strong>1. Install Emscripten SDK</strong></p>
+            <pre><code>git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+./emsdk install latest
+./emsdk activate latest
+source ./emsdk_env.sh</code></pre>
+
+            <p><strong>2. Install Rust with the wasm32-unknown-emscripten target:</strong></p>
+            <pre><code>rustup target add wasm32-unknown-emscripten</code></pre>
+
+            <p><strong>3. Set the BINDGEN_EXTRA_CLANG_ARGS environment variable:</strong></p>
+            <pre><code>export BINDGEN_EXTRA_CLANG_ARGS="--sysroot=$EMSDK/upstream/emscripten/cache/sysroot"</code></pre>
+
+            <h3>Build</h3>
+            <pre><code>make build</code></pre>
+            <p>This will generate
+                <code><a href="https://github.com/mrubyedge/sheetruby/blob/v0.2.0/combined.js" target="_blank">combined.js</a></code>
+                in the project root.</p>
+        </div>
+
+        <div class="card">
+            <h2>Contributing</h2>
+            <p>Bug reports and contributions are welcome! Please feel free to:</p>
+            <ul>
+                <li>Report issues on <a href="https://github.com/mrubyedge/sheetruby/issues" target="_blank">GitHub
+                        Issues</a></li>
+                <li>Submit pull requests</li>
+                <li>Share your use cases and feedback</li>
+            </ul>
         </div>
 
         <div class="cta">
-            <a href="https://github.com/mrubyedge/sheetruby" class="btn">View on GitHub</a>
+            <a href="https://github.com/mrubyedge/sheetruby" class="btn" target="_blank">View on GitHub</a>
+            <a href="https://github.com/udzura/mrubyedge" class="btn" target="_blank">mruby/edge Project</a>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2026 mruby/edge. Licensed under BSD 3-Clause License.</p>
-        <p>SheetRuby - Making spreadsheets programmable with Ruby</p>
+        <p>&copy; 2026 mruby/edge. See <a href="https://github.com/mrubyedge/sheetruby/blob/main/LICENSE"
+                style="color: white;">LICENSE</a> for details.</p>
+        <p>sheetruby - Making spreadsheets programmable with Ruby</p>
     </footer>
 </body>
+
 </html>
