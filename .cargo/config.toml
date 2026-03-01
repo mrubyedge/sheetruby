@@ -1,7 +1,7 @@
 [target.wasm32-unknown-emscripten]
 rustflags = [
     "-C",
-    "link-args=-o apps_script/out.js",
+    "link-args=-o out.js",
     "-C",
     "link-args=-s EXPORTED_FUNCTIONS=['_eval_ruby_script_int','_main']",
     "-C",
@@ -23,7 +23,7 @@ rustflags = [
     "-C",
     "link-args=-Oz",
     "-C",
-    "link-args=-sSUPPORT_LONGJMP=emscripten",
+    "link-args=-s SUPPORT_LONGJMP=emscripten",
     "-C",
     "link-args=-s SINGLE_FILE_BINARY_ENCODE=0",
     "-C",
