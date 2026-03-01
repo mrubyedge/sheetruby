@@ -33,6 +33,7 @@ fn eval_ruby_script(text: &str) -> Option<Rc<RObject>> {
     };
 
     let mut vm = mrubyedge::yamrb::vm::VM::open(&mut rite);
+    mrubyedge_math::init_math(&mut vm);
 
     // Execute the script and handle exceptions
     match vm.run() {
