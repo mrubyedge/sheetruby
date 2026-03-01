@@ -120,3 +120,84 @@ pub extern "C" fn eval_ruby_script_returning_json1(
         }
     }
 }
+
+#[unsafe(no_mangle)]
+pub extern "C" fn eval_ruby_script_returning_json2(
+    text_ptr: *const c_char,
+    arg1_ptr: *const c_char,
+    arg2_ptr: *const c_char,
+) -> *const c_char {
+    unsafe {
+        let text = cstr_to_str(text_ptr);
+        let arg1 = cstr_to_str(arg1_ptr);
+        let arg2 = cstr_to_str(arg2_ptr);
+        match eval_ruby_script_with_setup(text, |vm| {
+            let arg1_str = RObject::string(arg1.to_string()).to_refcount_assigned();
+            let arg1_json = mrubyedge_serde_json::mrb_json_class_load(vm, &[arg1_str])
+                .unwrap_or_else(|_| RObject::nil().to_refcount_assigned());
+            vm.globals.insert("$arg1".to_string(), arg1_json);
+
+            let arg2_str = RObject::string(arg2.to_string()).to_refcount_assigned();
+            let arg2_json = mrubyedge_serde_json::mrb_json_class_load(vm, &[arg2_str])
+                .unwrap_or_else(|_| RObject::nil().to_refcount_assigned());
+            vm.globals.insert("$arg2".to_string(), arg2_json);
+        }) {
+            Some(result) => {
+                let s: String = (&*result).try_into().unwrap_or_default();
+                match CString::new(s) {
+                    Ok(cstring) => {
+                        let ptr = cstring.as_ptr();
+                        LAST_STRING_RESULT = Some(cstring);
+                        ptr
+                    }
+                    Err(_) => std::ptr::null(),
+                }
+            }
+            None => std::ptr::null(),
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn eval_ruby_script_returning_json3(
+    text_ptr: *const c_char,
+    arg1_ptr: *const c_char,
+    arg2_ptr: *const c_char,
+    arg3_ptr: *const c_char,
+) -> *const c_char {
+    unsafe {
+        let text = cstr_to_str(text_ptr);
+        let arg1 = cstr_to_str(arg1_ptr);
+        let arg2 = cstr_to_str(arg2_ptr);
+        let arg3 = cstr_to_str(arg3_ptr);
+        match eval_ruby_script_with_setup(text, |vm| {
+            let arg1_str = RObject::string(arg1.to_string()).to_refcount_assigned();
+            let arg1_json = mrubyedge_serde_json::mrb_json_class_load(vm, &[arg1_str])
+                .unwrap_or_else(|_| RObject::nil().to_refcount_assigned());
+            vm.globals.insert("$arg1".to_string(), arg1_json);
+
+            let arg2_str = RObject::string(arg2.to_string()).to_refcount_assigned();
+            let arg2_json = mrubyedge_serde_json::mrb_json_class_load(vm, &[arg2_str])
+                .unwrap_or_else(|_| RObject::nil().to_refcount_assigned());
+            vm.globals.insert("$arg2".to_string(), arg2_json);
+
+            let arg3_str = RObject::string(arg3.to_string()).to_refcount_assigned();
+            let arg3_json = mrubyedge_serde_json::mrb_json_class_load(vm, &[arg3_str])
+                .unwrap_or_else(|_| RObject::nil().to_refcount_assigned());
+            vm.globals.insert("$arg3".to_string(), arg3_json);
+        }) {
+            Some(result) => {
+                let s: String = (&*result).try_into().unwrap_or_default();
+                match CString::new(s) {
+                    Ok(cstring) => {
+                        let ptr = cstring.as_ptr();
+                        LAST_STRING_RESULT = Some(cstring);
+                        ptr
+                    }
+                    Err(_) => std::ptr::null(),
+                }
+            }
+            None => std::ptr::null(),
+        }
+    }
+}

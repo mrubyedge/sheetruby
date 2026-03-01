@@ -1,6 +1,6 @@
 [package]
 name = "sheetruby"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
@@ -10,7 +10,6 @@ mrubyedge-math = "0.1.0"
 mrubyedge-serde-json = "0.1.0"
 
 [profile.dev]
-# FIXME: unccomment 
 # panic = "abort" # Reduce panic handling overhead
 
 [profile.release]
