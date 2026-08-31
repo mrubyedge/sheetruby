@@ -153,9 +153,9 @@ dependencies = [
 
 [[package]]
 name = "mrubyedge"
-version = "1.1.8"
+version = "1.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6637cd859a862100009f116830b1b1f6e932633d574c24480ba57983e208567"
+checksum = "c37186baae666e1498efb1eec24df5f2f371c5b3d558d58bb5ecc939774d694f"
 dependencies = [
  "plain",
  "simple_endian",
@@ -163,18 +163,18 @@ dependencies = [
 
 [[package]]
 name = "mrubyedge-math"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7faac1fa8bf95e7f02ca71824aebf139ed1dd20696e42e8e1c4cb8374dde2dbe"
+checksum = "31f80848bfd13ee2cce1e16592197c594b8a0d8c029b4d5c94308b1c3d51c5e3"
 dependencies = [
  "mrubyedge",
 ]
 
 [[package]]
 name = "mrubyedge-serde-json"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c51a1b5516aee35d6f4271fa86e77aa9a0a20fd3b7a3a5ee0acaaab7364adf62"
+checksum = "60953e31100c8113299bda08774f247902c446381370b89dbe8ead31c2658b7a"
 dependencies = [
  "mrubyedge",
  "serde",
