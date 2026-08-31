@@ -7,8 +7,8 @@
       <stop offset="0%" stop-color="#d7eee3"/>
       <stop offset="100%" stop-color="#f8f5f0" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="ruby-glow" cx="0%" cy="100%" r="65%">
-      <stop offset="0%" stop-color="#f3d7d7"/>
+    <radialGradient id="soft-green-glow" cx="0%" cy="100%" r="65%">
+      <stop offset="0%" stop-color="#cfe9dc"/>
       <stop offset="100%" stop-color="#f8f5f0" stop-opacity="0"/>
     </radialGradient>
     <clipPath id="sheet-clip">
@@ -18,17 +18,17 @@
 
   <rect width="1200" height="630" fill="#f8f5f0"/>
   <rect width="1200" height="630" fill="url(#green-glow)"/>
-  <rect width="1200" height="630" fill="url(#ruby-glow)"/>
+  <rect width="1200" height="630" fill="url(#soft-green-glow)"/>
 
   <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
     <rect x="79" y="58" width="60" height="60" rx="16" fill="#0e5b3e"/>
-    <path d="M88 51h28a16 16 0 0 1 16 16v28a16 16 0 0 1-16 16H78a6 6 0 0 1-6-6V67a16 16 0 0 1 16-16Z" fill="#dc2b3a"/>
+    <path d="M88 51h28a16 16 0 0 1 16 16v28a16 16 0 0 1-16 16H78a6 6 0 0 1-6-6V67a16 16 0 0 1 16-16Z" fill="#16815a"/>
     <path d="M24 17h5l-3 30h-5l3-30Zm14 0h5l-3 30h-5l3-30ZM17 27h30v5H17zM15 39h30v5H15z" transform="translate(73.5 51) scale(0.9375)" fill="#fff"/>
     <text x="148" y="91" fill="#17141f" font-size="30" font-weight="800" letter-spacing="-1">sheetruby</text>
 
     <text x="72" y="178" fill="#0e5b3e" font-size="16" font-weight="800" letter-spacing="3">GOOGLE SHEETS · RUBY · WEBASSEMBLY</text>
     <text x="68" y="292" fill="#17141f" font-size="94" font-weight="750" letter-spacing="-6">Ruby,</text>
-    <text x="68" y="384" fill="#dc2b3a" font-size="76" font-weight="750" letter-spacing="-5">in your sheet.</text>
+    <text x="68" y="384" fill="#16815a" font-size="76" font-weight="750" letter-spacing="-5">in your sheet.</text>
 
     <text x="72" y="453" fill="#4d4854" font-size="23">Run Ruby code in Google Sheets with</text>
     <text x="72" y="487" fill="#4d4854" font-size="23"><tspan fill="#17141f" font-weight="700">mruby/edge</tspan><tspan> and WebAssembly.</tspan></text>
@@ -39,7 +39,7 @@
       <rect x="704" y="92" width="418" height="424" rx="18" fill="#fffdf9" stroke="#17141f" stroke-width="3"/>
       <g clip-path="url(#sheet-clip)">
         <rect x="704" y="92" width="418" height="62" fill="#0e5b3e"/>
-        <circle cx="733" cy="123" r="6" fill="#ff8b83"/>
+        <circle cx="733" cy="123" r="6" fill="#5bae82"/>
         <circle cx="754" cy="123" r="6" fill="#8fc3aa"/>
         <circle cx="775" cy="123" r="6" fill="#8fc3aa"/>
         <text x="797" y="130" fill="#fff" font-size="15" font-weight="750">Ruby playground</text>
@@ -84,7 +84,7 @@
           <text x="772" y="476">hello</text>
           <text x="1018" y="476">HELLO</text>
         </g>
-        <g fill="#9e1625" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">
+        <g fill="#0e5b3e" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">
           <text x="894" y="352">$arg1 * 2</text>
           <text x="888" y="414">Math.sqrt($arg1)</text>
           <text x="894" y="476">$arg1.upcase</text>
