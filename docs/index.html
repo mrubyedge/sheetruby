@@ -1,302 +1,925 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SheetRuby - Run Ruby code in Google Sheets using mruby/edge">
-    <title>SheetRuby - mruby VM in your spreadsheet</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="sheetruby brings Ruby to Google Sheets as a custom function, powered by mruby/edge and WebAssembly.">
+    <meta name="theme-color" content="#17141f">
+    <link rel="canonical" href="https://mrubyedge.github.io/sheetruby/">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="sheetruby">
+    <meta property="og:title" content="sheetruby — Ruby, in your sheet">
+    <meta property="og:description" content="Run Ruby code in Google Sheets with mruby/edge and WebAssembly.">
+    <meta property="og:url" content="https://mrubyedge.github.io/sheetruby/">
+    <meta property="og:image" content="https://mrubyedge.github.io/sheetruby/assets/og-image.png">
+    <meta property="og:image:secure_url" content="https://mrubyedge.github.io/sheetruby/assets/og-image.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="sheetruby — Ruby, in your sheet">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="sheetruby — Ruby, in your sheet">
+    <meta name="twitter:description" content="Run Ruby code in Google Sheets with mruby/edge and WebAssembly.">
+    <meta name="twitter:image" content="https://mrubyedge.github.io/sheetruby/assets/og-image.png">
+    <meta name="twitter:image:alt" content="sheetruby — Ruby, in your sheet">
+
+    <title>sheetruby — Ruby, in your sheet</title>
     <style>
+        :root {
+            --ink: #17141f;
+            --muted: #625d69;
+            --paper: #f8f5f0;
+            --card: #fffdf9;
+            --ruby: #dc2b3a;
+            --ruby-dark: #9e1625;
+            --sheet: #16815a;
+            --sheet-dark: #0e5b3e;
+            --sheet-soft: #dcefe6;
+            --line: #ddd4c9;
+            --grid-line: #c9d9d1;
+            --code: #211d29;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 92% 4%, rgba(22, 129, 90, 0.16), transparent 28rem),
+                radial-gradient(circle at 5% 35%, rgba(220, 43, 58, 0.1), transparent 24rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
-        }
-
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 1rem;
-            font-size: 1.8rem;
-        }
-
-        .card h3 {
-            color: #764ba2;
-            margin-top: 1.5rem;
-            margin-bottom: 0.8rem;
-            font-size: 1.3rem;
-        }
-
-        .card p,
-        .card li {
-            margin-bottom: 0.8rem;
-        }
-
-        .card ul,
-        .card ol {
-            margin-left: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .cta {
-            text-align: center;
-            margin: 3rem 0;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: transform 0.3s ease;
-            margin: 0.5rem;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        footer {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 2rem 0;
-            margin-top: 4rem;
-        }
-
-        code {
-            background: #f4f4f4;
-            padding: 0.2rem 0.5rem;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 1rem;
-            border-radius: 5px;
-            overflow-x: auto;
-            margin: 1rem 0;
-        }
-
-        pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
-        }
-
-        .example {
-            background: #f9f9f9;
-            border-left: 4px solid #667eea;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-
-        .example strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 0.5rem;
         }
 
         a {
-            color: #667eea;
+            color: inherit;
+        }
+
+        a:focus-visible {
+            outline: 3px solid var(--sheet);
+            outline-offset: 4px;
+        }
+
+        code,
+        pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -5rem;
+            left: 1rem;
+            z-index: 20;
+            padding: 0.65rem 1rem;
+            color: white;
+            background: var(--ink);
+            border-radius: 0.4rem;
+        }
+
+        .skip-link:focus {
+            top: 1rem;
+        }
+
+        .shell {
+            width: min(1120px, calc(100% - 2rem));
+            margin-inline: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            min-height: 5rem;
+        }
+
+        .wordmark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1.15rem;
+            font-weight: 850;
+            letter-spacing: -0.035em;
             text-decoration: none;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .mark {
+            display: grid;
+            width: 2.1rem;
+            height: 2.1rem;
+            place-items: center;
+            color: white;
+            background: var(--ruby);
+            border-radius: 0.55rem 0.55rem 0.55rem 0.16rem;
+            box-shadow: 0.22rem 0.22rem 0 var(--sheet-dark);
+            font-size: 1rem;
+            font-style: italic;
+            font-weight: 900;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.4rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 0.9rem;
+            font-weight: 750;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: var(--sheet-dark);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(21rem, 0.95fr);
+            gap: clamp(3rem, 7vw, 6rem);
+            align-items: center;
+            min-height: 38rem;
+            padding-block: 4rem 7rem;
+        }
+
+        .eyebrow {
+            margin: 0 0 1rem;
+            color: var(--sheet-dark);
+            font-size: 0.78rem;
+            font-weight: 850;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            max-width: 9ch;
+            margin-bottom: 1.5rem;
+            font-size: clamp(3.8rem, 9vw, 7rem);
+            line-height: 0.9;
+            letter-spacing: -0.075em;
+        }
+
+        h1 span {
+            color: var(--ruby);
+        }
+
+        .lede {
+            max-width: 40rem;
+            margin-bottom: 2rem;
+            color: #4d4854;
+            font-size: clamp(1.08rem, 2vw, 1.28rem);
+        }
+
+        .lede strong {
+            color: var(--ink);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 3rem;
+            padding: 0.75rem 1.15rem;
+            border: 2px solid var(--ink);
+            border-radius: 0.55rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+        }
+
+        .button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        .button-primary {
+            color: white;
+            background: var(--ink);
+        }
+
+        .button-secondary {
+            background: rgba(255, 253, 249, 0.72);
+        }
+
+        .sheet-window {
+            overflow: hidden;
+            background: white;
+            border: 2px solid var(--ink);
+            border-radius: 0.85rem;
+            box-shadow: 0.8rem 0.8rem 0 var(--sheet);
+            transform: rotate(1.1deg);
+        }
+
+        .sheet-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 3rem;
+            padding: 0.65rem 0.8rem;
+            color: white;
+            background: var(--sheet-dark);
+        }
+
+        .sheet-dot {
+            width: 0.68rem;
+            height: 0.68rem;
+            background: #90bca9;
+            border-radius: 50%;
+        }
+
+        .sheet-dot:first-child {
+            background: #ff8b83;
+        }
+
+        .sheet-name {
+            margin-left: 0.45rem;
+            font-size: 0.78rem;
+            font-weight: 750;
+        }
+
+        .formula-bar {
+            display: grid;
+            grid-template-columns: 3.2rem 1fr;
+            min-height: 3.2rem;
+            border-bottom: 1px solid var(--grid-line);
+        }
+
+        .formula-symbol {
+            display: grid;
+            place-items: center;
+            color: var(--sheet-dark);
+            background: #f2f7f4;
+            border-right: 1px solid var(--grid-line);
+            font: italic 700 1rem Georgia, serif;
+        }
+
+        .formula {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            padding: 0.7rem 0.85rem;
+            color: #343039;
+            font-size: 0.74rem;
+            white-space: nowrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2.6rem repeat(3, 1fr);
+            grid-template-rows: 2rem repeat(4, 3.35rem);
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            padding: 0.5rem 0.65rem;
+            border-right: 1px solid var(--grid-line);
+            border-bottom: 1px solid var(--grid-line);
+            font-size: 0.8rem;
+        }
+
+        .cell:nth-child(4n) {
+            border-right: 0;
+        }
+
+        .corner,
+        .column,
+        .row {
+            justify-content: center;
+            padding: 0;
+            color: #65746d;
+            background: #f2f7f4;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        .selected {
+            position: relative;
+            z-index: 1;
+            margin: -1px;
+            color: var(--sheet-dark);
+            background: #f4fbf7;
+            border: 2px solid var(--sheet);
+            font-weight: 800;
+        }
+
+        .ruby-cell {
+            color: var(--ruby-dark);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.7rem;
+        }
+
+        .sheet-caption {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            color: #5d6963;
+            background: #f2f7f4;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status::before {
+            width: 0.48rem;
+            height: 0.48rem;
+            background: var(--sheet);
+            border-radius: 50%;
+            content: "";
+        }
+
+        section {
+            padding-block: 5.5rem;
+        }
+
+        .section-heading {
+            display: grid;
+            grid-template-columns: minmax(0, 0.85fr) minmax(18rem, 1.15fr);
+            gap: 2rem;
+            align-items: end;
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            margin-bottom: 0;
+            font-size: clamp(2.3rem, 5vw, 4.35rem);
+            line-height: 0.98;
+            letter-spacing: -0.06em;
+        }
+
+        .section-heading p {
+            max-width: 42rem;
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .feature {
+            min-height: 17rem;
+            padding: clamp(1.5rem, 4vw, 2.1rem);
+            background: rgba(255, 253, 249, 0.86);
+            border: 1px solid var(--line);
+            border-radius: 0.8rem;
+        }
+
+        .feature-number {
+            display: block;
+            margin-bottom: 2.8rem;
+            color: var(--sheet-dark);
+            font: 750 0.78rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.35rem;
+            line-height: 1.25;
+            letter-spacing: -0.025em;
+        }
+
+        .feature p {
+            margin-bottom: 0;
+            color: var(--muted);
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            overflow: hidden;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            border-radius: 0.85rem;
+            box-shadow: 0.65rem 0.65rem 0 var(--ruby);
+        }
+
+        .flow-step {
+            position: relative;
+            min-height: 15rem;
+            padding: 2rem;
+            color: white;
+            border-right: 1px solid #4a4452;
+        }
+
+        .flow-step:last-child {
+            border-right: 0;
+        }
+
+        .flow-step::after {
+            position: absolute;
+            top: 50%;
+            right: -0.7rem;
+            z-index: 2;
+            display: grid;
+            width: 1.4rem;
+            height: 1.4rem;
+            place-items: center;
+            color: var(--ink);
+            background: var(--sheet-soft);
+            border-radius: 50%;
+            content: "→";
+            font-size: 0.8rem;
+            font-weight: 900;
+            transform: translateY(-50%);
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .flow-label {
+            display: block;
+            margin-bottom: 2.4rem;
+            color: #9bd2b8;
+            font: 750 0.72rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .flow-step h3 {
+            font-size: 1.5rem;
+        }
+
+        .flow-step p {
+            margin-bottom: 0;
+            color: #cbc4d2;
+        }
+
+        .get-started {
+            display: grid;
+            grid-template-columns: minmax(0, 0.85fr) minmax(21rem, 1.15fr);
+            gap: clamp(2rem, 7vw, 5rem);
+            align-items: start;
+        }
+
+        .steps {
+            margin: 2rem 0 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: setup;
+        }
+
+        .steps li {
+            position: relative;
+            margin-bottom: 1.25rem;
+            padding-left: 3.2rem;
+            color: var(--muted);
+            counter-increment: setup;
+        }
+
+        .steps li::before {
+            position: absolute;
+            top: -0.15rem;
+            left: 0;
+            display: grid;
+            width: 2.15rem;
+            height: 2.15rem;
+            place-items: center;
+            color: white;
+            background: var(--sheet);
+            border-radius: 50%;
+            content: counter(setup);
+            font-size: 0.78rem;
+            font-weight: 850;
+        }
+
+        .steps strong {
+            display: block;
+            color: var(--ink);
+        }
+
+        .steps a {
+            color: var(--sheet-dark);
+            font-weight: 750;
+        }
+
+        .code-card {
+            overflow: hidden;
+            color: #f8f3ed;
+            background: var(--code);
+            border: 2px solid var(--ink);
+            border-radius: 0.8rem;
+            box-shadow: 0.7rem 0.7rem 0 var(--sheet);
+        }
+
+        .code-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: #302a39;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .version {
+            color: #a9e2c7;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        pre {
+            margin: 0;
+            padding: 1.35rem;
+            overflow-x: auto;
+            font-size: 0.78rem;
+            line-height: 1.85;
+        }
+
+        .comment {
+            color: #9d96a6;
+        }
+
+        .formula-code {
+            color: #f3f0f6;
+        }
+
+        .ruby-code {
+            color: #ff8d84;
+        }
+
+        .result {
+            color: #a9e2c7;
+        }
+
+        .limits {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .limit {
+            padding: 1.35rem;
+            background: var(--sheet-soft);
+            border-radius: 0.7rem;
+        }
+
+        .limit strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.9rem;
+        }
+
+        .limit p {
+            margin-bottom: 0;
+            color: #355849;
+            font-size: 0.86rem;
+        }
+
+        .closing {
+            padding-block: 7rem;
+            text-align: center;
+        }
+
+        .closing h2 {
+            max-width: 13ch;
+            margin-inline: auto;
+            margin-bottom: 1.25rem;
+        }
+
+        .closing p {
+            max-width: 38rem;
+            margin: 0 auto 2rem;
+            color: var(--muted);
+            font-size: 1.08rem;
+        }
+
+        footer {
+            padding-block: 2rem;
+            color: #d8d2dd;
+            background: var(--ink);
+            font-size: 0.85rem;
+        }
+
+        .footer-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        footer p {
+            margin-bottom: 0;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        @media (max-width: 820px) {
+            .hero,
+            .section-heading,
+            .get-started {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                min-height: auto;
+                padding-block: 3rem 6rem;
+            }
+
+            .sheet-window {
+                max-width: 34rem;
+            }
+
+            .feature-grid,
+            .flow {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-step {
+                min-height: 0;
+                border-right: 0;
+                border-bottom: 1px solid #4a4452;
+            }
+
+            .flow-step:last-child {
+                border-bottom: 0;
+            }
+
+            .flow-step::after {
+                top: auto;
+                right: 50%;
+                bottom: -0.7rem;
+                content: "↓";
+                transform: translateX(50%);
+            }
+
+            .limits {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav-links li:not(:last-child) {
+                display: none;
+            }
+
+            h1 {
+                font-size: clamp(3.5rem, 20vw, 5.5rem);
+            }
+
+            section {
+                padding-block: 4.25rem;
+            }
+
+            .sheet-window {
+                margin-right: 0.65rem;
+            }
+
+            .formula {
+                font-size: 0.64rem;
+            }
+
+            .grid {
+                grid-template-columns: 2rem repeat(3, 1fr);
+            }
+
+            .cell {
+                padding-inline: 0.4rem;
+            }
+
+            .footer-inner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .button {
+                transition: none;
+            }
         }
     </style>
 </head>
-
 <body>
-    <header>
-        <h1>🔷 sheetruby</h1>
-        <p>Run Ruby code in Google Sheets using mruby/edge</p>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="shell">
+        <nav aria-label="Primary navigation">
+            <a class="wordmark" href="#top" aria-label="sheetruby home">
+                <span class="mark" aria-hidden="true">/</span>
+                sheetruby
+            </a>
+            <ul class="nav-links">
+                <li><a href="#how">How it works</a></li>
+                <li><a href="#start">Get started</a></li>
+                <li><a href="https://github.com/mrubyedge/sheetruby">GitHub ↗</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <div class="container">
-        <div class="card">
-            <h2>What is sheetruby?</h2>
-            <p>
-                sheetruby embeds the <a href="https://github.com/udzura/mrubyedge" target="_blank">mruby/edge</a> VM
-                into Google Apps Script, allowing you to execute Ruby code directly in your spreadsheets.
-                It compiles to WebAssembly and runs entirely within Google Sheets' Apps Script environment.
-            </p>
-        </div>
-
-        <div class="card">
-            <h2>How to Use</h2>
-            <ol>
-                <li>Open your Google Spreadsheet</li>
-                <li>Go to <strong>Extensions</strong> → <strong>Apps Script</strong></li>
-                <li>Copy the contents of
-                    <code><a href="https://github.com/mrubyedge/sheetruby/blob/v0.2.0/combined.js" target="_blank">combined.js</a></code>
-                    and paste it into the script editor</li>
-                <li>Save the script</li>
-                <li>Return to your spreadsheet - the <code>EVAL_RUBY_SCRIPT()</code> function is now available!</li>
-            </ol>
-        </div>
-
-        <div class="card">
-            <h2><code>EVAL_RUBY_SCRIPT()</code> Function Specification</h2>
-            <pre><code>EVAL_RUBY_SCRIPT(ruby_code, [arg1], [arg2], [arg3])</code></pre>
-
-            <h3>Parameters</h3>
-            <ul>
-                <li><strong>First argument (required)</strong>: Ruby script code
-                    <ul>
-                        <li>Can be a string literal or reference to a cell</li>
-                    </ul>
-                </li>
-                <li><strong>Arguments 2-4 (optional)</strong>: Data to pass to the Ruby script
-                    <ul>
-                        <li>Can reference cells or ranges</li>
-                        <li>Accessible in Ruby as global variables <code>$arg1</code>, <code>$arg2</code>,
-                            <code>$arg3</code></li>
-                        <li>Currently supports up to 3 arguments</li>
-                    </ul>
-                </li>
-            </ul>
-
-            <h3>Type Handling</h3>
-            <ul>
-                <li><strong>Single cell</strong>: Type is automatically inferred (number, string, boolean)</li>
-                <li><strong>Multiple cells</strong>: Passed as a 2D array (Array of Arrays)</li>
-                <li><strong>Return value</strong>: Type is automatically inferred from Ruby result via JSON
-                    serialization</li>
-            </ul>
-
-            <h3>Examples</h3>
-
-            <div class="example">
-                <strong>Basic calculation:</strong>
-                <pre><code>=EVAL_RUBY_SCRIPT("1 + 2")
-# => 3</code></pre>
+    <main id="main">
+        <section class="hero shell" id="top">
+            <div>
+                <p class="eyebrow">Google Sheets · Ruby · WebAssembly</p>
+                <h1>Ruby, <span>in your sheet.</span></h1>
+                <p class="lede"><strong>sheetruby</strong> brings Ruby to Google Sheets as a custom function. Write Ruby in a formula, pass in cells or ranges, and get the result back in your spreadsheet.</p>
+                <div class="actions">
+                    <a class="button button-primary" href="#start">Add it to a sheet</a>
+                    <a class="button button-secondary" href="https://github.com/mrubyedge/sheetruby">View on GitHub</a>
+                </div>
             </div>
 
-            <div class="example">
-                <strong>Using cell references:</strong>
-                <pre><code>=EVAL_RUBY_SCRIPT("$arg1 * 2", A1)
-# If A1 = 21, returns 42</code></pre>
+            <div class="sheet-window" aria-label="Example Google Sheet using sheetruby">
+                <div class="sheet-toolbar">
+                    <span class="sheet-dot" aria-hidden="true">&#8203;</span>
+                    <span class="sheet-dot" aria-hidden="true">&#8203;</span>
+                    <span class="sheet-dot" aria-hidden="true">&#8203;</span>
+                    <span class="sheet-name">Ruby playground</span>
+                </div>
+                <div class="formula-bar">
+                    <span class="formula-symbol">fx</span>
+                    <code class="formula">=EVAL_RUBY_SCRIPT("$arg1 * 2", A2)</code>
+                </div>
+                <div class="grid" aria-hidden="true">
+                    <span class="cell corner" aria-hidden="true">&#8203;</span>
+                    <span class="cell column">A</span>
+                    <span class="cell column">B</span>
+                    <span class="cell column">C</span>
+                    <span class="cell row">1</span>
+                    <span class="cell">input</span>
+                    <span class="cell">Ruby</span>
+                    <span class="cell">result</span>
+                    <span class="cell row">2</span>
+                    <span class="cell">21</span>
+                    <span class="cell ruby-cell">$arg1 * 2</span>
+                    <span class="cell selected">42</span>
+                    <span class="cell row">3</span>
+                    <span class="cell">16</span>
+                    <span class="cell ruby-cell">Math.sqrt($arg1)</span>
+                    <span class="cell">4</span>
+                    <span class="cell row">4</span>
+                    <span class="cell">hello</span>
+                    <span class="cell ruby-cell">$arg1.upcase</span>
+                    <span class="cell">HELLO</span>
+                </div>
+                <div class="sheet-caption">
+                    <span>Powered by mruby/edge</span>
+                    <span class="status">Apps Script</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="shell" aria-labelledby="why-title">
+            <div class="section-heading">
+                <h2 id="why-title">A Ruby VM in your spreadsheet.</h2>
+                <p>sheetruby embeds <a href="https://mrubyedge.github.io/">mruby/edge</a> into Google Apps Script as WebAssembly. No separate application server is needed: formulas are compiled and evaluated in the Apps Script environment.</p>
+            </div>
+            <div class="feature-grid">
+                <article class="feature">
+                    <span class="feature-number">01 / FORMULA</span>
+                    <h3>Feels native to Sheets</h3>
+                    <p>Call <code>EVAL_RUBY_SCRIPT()</code> like any other custom function and reference spreadsheet cells directly.</p>
+                </article>
+                <article class="feature">
+                    <span class="feature-number">02 / RUBY</span>
+                    <h3>Real Ruby expressions</h3>
+                    <p>Use Ruby syntax and the bundled <code>Math</code> module for calculations, transformations, and text handling.</p>
+                </article>
+                <article class="feature">
+                    <span class="feature-number">03 / TYPES</span>
+                    <h3>Values cross the bridge</h3>
+                    <p>Numbers, strings, booleans, and 2D cell-range arrays move between Sheets and Ruby through JSON serialization.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="shell" id="how" aria-labelledby="how-title">
+            <div class="section-heading">
+                <h2 id="how-title">From formula to result.</h2>
+                <p>The source text and spreadsheet values stay together through a compact Rust and WebAssembly pipeline.</p>
+            </div>
+            <div class="flow">
+                <article class="flow-step">
+                    <span class="flow-label">Step 01</span>
+                    <h3>Sheets calls Ruby</h3>
+                    <p>The custom function receives Ruby source plus as many as three cell or range arguments.</p>
+                </article>
+                <article class="flow-step">
+                    <span class="flow-label">Step 02</span>
+                    <h3>mruby/edge runs it</h3>
+                    <p>The embedded compiler produces mruby bytecode, then the Rust-based VM executes it inside Wasm.</p>
+                </article>
+                <article class="flow-step">
+                    <span class="flow-label">Step 03</span>
+                    <h3>The value returns</h3>
+                    <p>The Ruby result is serialized as JSON and converted back into a value Google Sheets understands.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="shell" id="start" aria-labelledby="start-title">
+            <div class="get-started">
+                <div>
+                    <p class="eyebrow">Get started</p>
+                    <h2 id="start-title">Paste once. Write Ruby anywhere.</h2>
+                    <ol class="steps">
+                        <li><strong>Open Apps Script</strong>In your spreadsheet, choose Extensions → Apps Script.</li>
+                        <li><strong>Install sheetruby</strong>Copy the current <a href="https://github.com/mrubyedge/sheetruby/blob/main/combined.js">combined.js</a> into the editor and save.</li>
+                        <li><strong>Use the function</strong>Return to the sheet and enter <code>EVAL_RUBY_SCRIPT()</code> in a cell.</li>
+                    </ol>
+                </div>
+
+                <div class="code-card" aria-label="sheetruby formula examples">
+                    <div class="code-title">
+                        <span>Google Sheets formulas</span>
+                        <span class="version">v0.2.0</span>
+                    </div>
+                    <pre><code><span class="comment"># Evaluate Ruby directly</span>
+<span class="formula-code">=EVAL_RUBY_SCRIPT("1 + 2")</span>
+<span class="result">→ 3</span>
+
+<span class="comment"># Pass a cell as $arg1</span>
+<span class="formula-code">=EVAL_RUBY_SCRIPT("$arg1 * 2", A1)</span>
+<span class="result">→ 42</span>
+
+<span class="comment"># Ruby string methods</span>
+<span class="formula-code">=EVAL_RUBY_SCRIPT("$arg1.upcase", A1)</span>
+<span class="result">→ "HELLO"</span>
+
+<span class="comment"># Bundled Math support</span>
+<span class="formula-code">=EVAL_RUBY_SCRIPT("Math.sqrt($arg1)", 16)</span>
+<span class="result">→ 4.0</span></code></pre>
+                </div>
             </div>
 
-            <div class="example">
-                <strong>Array processing:</strong>
-                <pre><code>=EVAL_RUBY_SCRIPT("$arg1.map { |x| x * $arg2 }", A1:A3, B1)
-# If A1:A3 = [[1], [2], [3]] and B1 = 10
-# Returns [10, 20, 30]</code></pre>
+            <div class="limits" aria-label="Function details">
+                <div class="limit">
+                    <strong>Function signature</strong>
+                    <p><code>EVAL_RUBY_SCRIPT(code, arg1, arg2, arg3)</code></p>
+                </div>
+                <div class="limit">
+                    <strong>Cell ranges</strong>
+                    <p>Multiple cells arrive in Ruby as a two-dimensional array.</p>
+                </div>
+                <div class="limit">
+                    <strong>Argument limit</strong>
+                    <p>Up to three values or ranges are exposed as <code>$arg1</code>–<code>$arg3</code>.</p>
+                </div>
             </div>
+        </section>
 
-            <div class="example">
-                <strong>Multiple arguments:</strong>
-                <pre><code>=EVAL_RUBY_SCRIPT("$arg1 + $arg2 + $arg3", A1, B1, C1)
-# Sum of three cells</code></pre>
+        <section class="closing shell" aria-labelledby="closing-title">
+            <p class="eyebrow">Open source · MIT licensed</p>
+            <h2 id="closing-title">Make your cells speak Ruby.</h2>
+            <p>Explore the source, report an issue, or help shape the next version of sheetruby.</p>
+            <div class="actions" style="justify-content: center;">
+                <a class="button button-primary" href="https://github.com/mrubyedge/sheetruby">Explore sheetruby</a>
+                <a class="button button-secondary" href="https://mrubyedge.github.io/">Meet mruby/edge</a>
             </div>
-
-            <div class="example">
-                <strong>String manipulation:</strong>
-                <pre><code>=EVAL_RUBY_SCRIPT("$arg1.upcase", A1)
-# If A1 = "hello", returns "HELLO"</code></pre>
-            </div>
-
-            <div class="example">
-                <strong>Math functions (with mrubyedge-math):</strong>
-                <pre><code>=EVAL_RUBY_SCRIPT("Math.sqrt($arg1)", 16)
-# => 4.0</code></pre>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Building from Source</h2>
-
-            <h3>Prerequisites</h3>
-
-            <p><strong>1. Install Emscripten SDK</strong></p>
-            <pre><code>git clone https://github.com/emscripten-core/emsdk.git
-cd emsdk
-./emsdk install latest
-./emsdk activate latest
-source ./emsdk_env.sh</code></pre>
-
-            <p><strong>2. Install Rust with the wasm32-unknown-emscripten target:</strong></p>
-            <pre><code>rustup target add wasm32-unknown-emscripten</code></pre>
-
-            <p><strong>3. Set the BINDGEN_EXTRA_CLANG_ARGS environment variable:</strong></p>
-            <pre><code>export BINDGEN_EXTRA_CLANG_ARGS="--sysroot=$EMSDK/upstream/emscripten/cache/sysroot"</code></pre>
-
-            <h3>Build</h3>
-            <pre><code>make build</code></pre>
-            <p>This will generate
-                <code><a href="https://github.com/mrubyedge/sheetruby/blob/v0.2.0/combined.js" target="_blank">combined.js</a></code>
-                in the project root.</p>
-        </div>
-
-        <div class="card">
-            <h2>Contributing</h2>
-            <p>Bug reports and contributions are welcome! Please feel free to:</p>
-            <ul>
-                <li>Report issues on <a href="https://github.com/mrubyedge/sheetruby/issues" target="_blank">GitHub
-                        Issues</a></li>
-                <li>Submit pull requests</li>
-                <li>Share your use cases and feedback</li>
-            </ul>
-        </div>
-
-        <div class="cta">
-            <a href="https://github.com/mrubyedge/sheetruby" class="btn" target="_blank">View on GitHub</a>
-            <a href="https://github.com/udzura/mrubyedge" class="btn" target="_blank">mruby/edge Project</a>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <footer>
-        <p>&copy; 2026 mruby/edge. See <a href="https://github.com/mrubyedge/sheetruby/blob/main/LICENSE"
-                style="color: white;">LICENSE</a> for details.</p>
-        <p>sheetruby - Making spreadsheets programmable with Ruby</p>
+        <div class="footer-inner shell">
+            <p><strong>sheetruby</strong> · Ruby in Google Sheets, powered by mruby/edge.</p>
+            <p><a href="https://github.com/mrubyedge/sheetruby/blob/main/LICENSE">MIT License</a> · 2026</p>
+        </div>
     </footer>
 </body>
-
 </html>
